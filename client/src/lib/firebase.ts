@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, getRedirectResult, signOut, User } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,9 +13,11 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 const provider = new GoogleAuthProvider();
+provider.addScope('email');
+provider.addScope('profile');
 
 export function signInWithGoogle() {
-  return signInWithRedirect(auth, provider);
+  return signInWithPopup(auth, provider);
 }
 
 export function logout() {
@@ -24,9 +26,4 @@ export function logout() {
 
 export function onAuthStateChange(callback: (user: User | null) => void) {
   return onAuthStateChanged(auth, callback);
-}
-
-export async function handleRedirectResult() {
-  const result = await getRedirectResult(auth);
-  return result;
 }

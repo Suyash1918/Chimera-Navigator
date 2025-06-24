@@ -14,9 +14,11 @@ export function AuthHeader() {
 
   const handleSignIn = async () => {
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      console.log('Sign in successful:', result.user?.displayName);
     } catch (error) {
       console.error('Sign in failed:', error);
+      // You could add a toast notification here if needed
     }
   };
 
