@@ -1,0 +1,395 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+  --chart-1: hsl(207, 90%, 54%);
+  --chart-2: hsl(245, 58%, 51%);
+  --chart-3: hsl(142, 76%, 36%);
+  --chart-4: hsl(43, 74%, 66%);
+  --chart-5: hsl(27, 87%, 67%);
+  --sidebar-background: hsl(0, 0%, 98%);
+  --sidebar-foreground: hsl(240, 5.3%, 26.1%);
+  --sidebar-primary: hsl(240, 5.9%, 10%);
+  --sidebar-primary-foreground: hsl(0, 0%, 98%);
+  --sidebar-accent: hsl(240, 4.8%, 95.9%);
+  --sidebar-accent-foreground: hsl(240, 5.9%, 10%);
+  --sidebar-border: hsl(220, 13%, 91%);
+  --sidebar-ring: hsl(217.2, 91.2%, 59.8%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+  --chart-1: hsl(207, 90%, 54%);
+  --chart-2: hsl(245, 58%, 51%);
+  --chart-3: hsl(142, 76%, 36%);
+  --chart-4: hsl(43, 74%, 66%);
+  --chart-5: hsl(27, 87%, 67%);
+  --sidebar-background: hsl(240, 5.9%, 10%);
+  --sidebar-foreground: hsl(240, 4.8%, 95.9%);
+  --sidebar-primary: hsl(224.3, 76.3%, 94.1%);
+  --sidebar-primary-foreground: hsl(240, 5.9%, 10%);
+  --sidebar-accent: hsl(240, 3.7%, 15.9%);
+  --sidebar-accent-foreground: hsl(240, 4.8%, 95.9%);
+  --sidebar-border: hsl(240, 3.7%, 15.9%);
+  --sidebar-ring: hsl(217.2, 91.2%, 59.8%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Custom scrollbar for better UX */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 hover:bg-gray-400;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-corner {
+    @apply bg-gray-100;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(220, 14.3%, 85.9%) hsl(220, 14.3%, 95.9%);
+  }
+}
+
+@layer components {
+  /* Custom component styles for ChimeraNavigator */
+  .ast-node {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .ast-node:hover {
+    @apply transform translate-x-1 shadow-sm;
+  }
+
+  .progress-bar {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .chat-message {
+    @apply animate-in slide-in-from-bottom-2 duration-300;
+  }
+
+  .file-drop-zone {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .file-drop-zone.active {
+    @apply border-blue-500 bg-blue-50 scale-[1.02];
+  }
+
+  .loading-shimmer {
+    @apply animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Status indicators */
+  .status-online {
+    @apply bg-green-500 text-white;
+  }
+
+  .status-offline {
+    @apply bg-red-500 text-white;
+  }
+
+  .status-processing {
+    @apply bg-yellow-500 text-white;
+  }
+
+  /* Code syntax highlighting for schema editor */
+  .code-editor {
+    @apply font-mono text-sm leading-relaxed;
+  }
+
+  .code-editor .token.keyword {
+    @apply text-blue-600 font-semibold;
+  }
+
+  .code-editor .token.string {
+    @apply text-green-600;
+  }
+
+  .code-editor .token.number {
+    @apply text-purple-600;
+  }
+
+  .code-editor .token.comment {
+    @apply text-gray-500 italic;
+  }
+
+  .code-editor .token.property {
+    @apply text-red-600;
+  }
+
+  .code-editor .token.boolean {
+    @apply text-blue-800 font-semibold;
+  }
+
+  /* Log viewer styling */
+  .log-line {
+    @apply font-mono text-sm leading-relaxed;
+  }
+
+  .log-line .log-level-error {
+    @apply text-red-400 font-semibold;
+  }
+
+  .log-line .log-level-warn {
+    @apply text-yellow-400 font-semibold;
+  }
+
+  .log-line .log-level-info {
+    @apply text-green-400 font-semibold;
+  }
+
+  .log-line .log-level-debug {
+    @apply text-blue-400 font-semibold;
+  }
+
+  .log-line .log-level-success {
+    @apply text-green-400 font-semibold;
+  }
+
+  .log-line .log-timestamp {
+    @apply text-gray-400;
+  }
+
+  /* Navigation active states */
+  .nav-item-active {
+    @apply text-primary bg-primary/10 border-primary/20;
+  }
+
+  .nav-item {
+    @apply transition-all duration-150 ease-in-out;
+  }
+
+  .nav-item:hover {
+    @apply bg-gray-50 text-gray-900;
+  }
+
+  /* AI Chat specific styles */
+  .ai-message {
+    @apply bg-gray-50 text-gray-900 border border-gray-200;
+  }
+
+  .user-message {
+    @apply bg-primary text-white;
+  }
+
+  .typing-indicator {
+    @apply flex space-x-1;
+  }
+
+  .typing-dot {
+    @apply w-2 h-2 bg-gray-400 rounded-full animate-bounce;
+  }
+
+  .typing-dot:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  .typing-dot:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+
+  /* File upload drag states */
+  .file-upload-active {
+    @apply border-primary bg-primary/5 scale-[1.01];
+  }
+
+  /* Project cards */
+  .project-card {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .project-card:hover {
+    @apply shadow-md scale-[1.02] border-primary/20;
+  }
+
+  /* Badge variants for different statuses */
+  .badge-success {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+  }
+
+  .badge-error {
+    @apply bg-red-100 text-red-800 border-red-200;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+  }
+
+  /* Floating action button */
+  .fab {
+    @apply fixed bottom-6 right-6 z-50 shadow-lg hover:shadow-xl transition-all duration-200;
+  }
+
+  .fab:hover {
+    @apply scale-110;
+  }
+
+  /* Gradient backgrounds for branding */
+  .gradient-primary {
+    @apply bg-gradient-to-br from-primary to-secondary;
+  }
+
+  .gradient-success {
+    @apply bg-gradient-to-br from-green-500 to-green-600;
+  }
+
+  .gradient-warning {
+    @apply bg-gradient-to-br from-yellow-500 to-orange-500;
+  }
+
+  /* Focus states for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  /* Responsive utilities */
+  .container-responsive {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  /* Custom utility classes */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Animation utilities */
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Layout utilities */
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh;
+  }
+}
