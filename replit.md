@@ -62,17 +62,26 @@ ChimeraNavigator is a comprehensive React/TypeScript code analysis platform that
 - Session management
 
 ## Recent Changes
-- 2024-01-24: Successfully migrated from Replit Agent to Replit environment
-- Fixed PostgreSQL database connection
+- 2024-06-24: Successfully migrated from Replit Agent to Replit environment
+- Fixed PostgreSQL database connection and created all required tables
 - Made OpenAI service optional to prevent startup crashes
 - Added Firebase authentication credentials
-- Application now running on port 5000
+- Implemented tiered account system (Free Trial vs Pro)
+- Added credit management and account upgrade functionality
+- Created AI-powered schema modification system
+- Added comprehensive README for developers
+- Application running successfully on port 5000
 
 ## User Preferences
-- None specified yet
+- Wants tiered account structure with free trial (1 credit) and pro accounts
+- Prefers AI-driven schema modifications through natural language
+- Values comprehensive documentation for development team
 
 ## Current Status
-✅ Application successfully running and ready for use
-✅ Database configured and connected
-✅ Authentication system active
-✅ AI features available (requires OPENAI_API_KEY for full functionality)
+✅ Application fully functional with tiered account system
+✅ Database schema complete with user credit management
+✅ Authentication system with Firebase integration
+✅ Credit-based project creation (Free: 1 credit, Pro: unlimited)
+✅ AI-powered schema modification (requires OPENAI_API_KEY)
+✅ Account upgrade system working
+✅ Comprehensive developer documentation created

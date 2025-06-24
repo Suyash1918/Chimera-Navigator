@@ -135,6 +135,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'User not found' });
       }
 
+      // Check if user can create projects
+      const canCreate = await storage.canUserCreateProject(user.id);
+      if (!canCreate) {
+        return res.status(403).json({ 
+          error: 'Insufficient credits. Upgrade to Pro or contact support.',
+          accountTier: user.accountTier,
+          credits: user.credits
+        });
+      }
+
       const projectData = insertProjectSchema.parse({
         ...req.body,
         userId: user.id
@@ -142,12 +152,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const project = await storage.createProject(projectData);
       
-      // Log project creation
+      // Deduct credit for free tier users
+      if (user.accountTier === 'free' && user.credits !== null) {
+        await storage.updateUserCredits(user.id, user.credits - 1);
+      }
+      
       await storage.createLog({
         projectId: project.id,
         level: 'INFO',
         message: `Project "${project.name}" created`,
-        metadata: {}
+        metadata: { accountTier: user.accountTier, creditsUsed: user.accountTier === 'free' ? 1 : 0 }
       });
 
       res.json(project);
@@ -332,7 +346,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Project not found' });
       }
 
-      // Verify ownership
       const user = await storage.getUserByFirebaseUid(req.firebaseUid);
       if (!user || project.userId !== user.id) {
         return res.status(403).json({ error: 'Access denied' });
@@ -343,6 +356,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Generate review error:', error);
       res.status(500).json({ error: 'Failed to generate code review' });
+    }
+  });
+
+  // Account Management
+  app.get('/api/users/:id/credits', requireAuth, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const requestingUser = await storage.getUserByFirebaseUid(req.firebaseUid);
+      if (!requestingUser || requestingUser.id !== userId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      res.json({
+        accountTier: user.accountTier,
+        credits: user.credits,
+        canCreateProject: await storage.canUserCreateProject(userId)
+      });
+    } catch (error) {
+      console.error('Get credits error:', error);
+      res.status(500).json({ error: 'Failed to get credits' });
+    }
+  });
+
+  app.post('/api/users/:id/upgrade', requireAuth, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const requestingUser = await storage.getUserByFirebaseUid(req.firebaseUid);
+      if (!requestingUser || requestingUser.id !== userId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      await storage.upgradeUserAccount(userId);
+      
+      await storage.createLog({
+        projectId: null,
+        level: 'INFO',
+        message: `User ${user.email} upgraded to Pro account`,
+        metadata: { userId, previousTier: user.accountTier }
+      });
+
+      res.json({ success: true, message: 'Account upgraded to Pro' });
+    } catch (error) {
+      console.error('Upgrade account error:', error);
+      res.status(500).json({ error: 'Failed to upgrade account' });
+    }
+  });
+
+  // Schema Modification Endpoint
+  app.post('/api/ai/modify-schema', requireAuth, async (req: any, res) => {
+    try {
+      const { command, currentSchema, projectId } = req.body;
+      
+      if (projectId) {
+        const project = await storage.getProject(projectId);
+        if (!project) {
+          return res.status(404).json({ error: 'Project not found' });
+        }
+
+        const user = await storage.getUserByFirebaseUid(req.firebaseUid);
+        if (!user || project.userId !== user.id) {
+          return res.status(403).json({ error: 'Access denied' });
+        }
+      }
+
+      const result = await aiService.processSchemaCommand(command, currentSchema);
+      
+      if (result.success && projectId) {
+        // Update the project's analysis results with new schema
+        const analysisResult = await storage.getAnalysisResult(projectId);
+        if (analysisResult) {
+          await storage.updateAnalysisResult(projectId, {
+            schema: result.modifiedSchema
+          });
+        }
+
+        await storage.createLog({
+          projectId,
+          level: 'INFO',
+          message: `Schema modified: ${result.explanation}`,
+          metadata: { command, schemaModified: true }
+        });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Schema modification error:', error);
+      res.status(500).json({ error: 'Failed to modify schema' });
     }
   });
 

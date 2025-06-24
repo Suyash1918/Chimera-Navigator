@@ -1,6 +1,7 @@
 import { useAuth } from '@/components/auth-provider';
 import { Dashboard as DashboardComponent } from '@/components/dashboard';
 import { AuthHeader } from '@/components/auth-header';
+import { AccountStatus } from '@/components/account-status';
 
 export function Dashboard() {
   const { user, loading } = useAuth();
@@ -24,7 +25,16 @@ export function Dashboard() {
       
       <main className="container mx-auto px-4 py-8">
         {user ? (
-          <DashboardComponent />
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-1">
+                <AccountStatus />
+              </div>
+              <div className="lg:col-span-3">
+                <DashboardComponent />
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="text-center py-16">
             <h1 className="text-4xl font-bold mb-4">ChimeraNavigator AI</h1>

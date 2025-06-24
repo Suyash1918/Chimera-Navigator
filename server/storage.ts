@@ -16,6 +16,9 @@ export interface IStorage {
   getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User>;
+  updateUserCredits(userId: number, credits: number): Promise<void>;
+  upgradeUserAccount(userId: number): Promise<void>;
+  canUserCreateProject(userId: number): Promise<boolean>;
 
   // Projects
   getProject(id: number): Promise<Project | undefined>;
@@ -64,6 +67,32 @@ export class DatabaseStorage implements IStorage {
   async updateUser(id: number, updates: Partial<InsertUser>): Promise<User> {
     const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
     return user;
+  }
+
+  async updateUserCredits(userId: number, credits: number): Promise<void> {
+    await db
+      .update(users)
+      .set({ credits, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+
+  async upgradeUserAccount(userId: number): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        accountTier: 'pro',
+        credits: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async canUserCreateProject(userId: number): Promise<boolean> {
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) return false;
+    
+    if (user.accountTier === 'pro') return true;
+    return (user.credits || 0) > 0;
   }
 
   // Projects

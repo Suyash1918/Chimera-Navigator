@@ -9,7 +9,10 @@ export const users = pgTable("users", {
   email: text("email").notNull(),
   displayName: text("display_name"),
   photoURL: text("photo_url"),
+  accountTier: text("account_tier").notNull().default("free"), // 'free' | 'pro'
+  credits: integer("credits").default(1), // null for pro accounts (unlimited)
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const projects = pgTable("projects", {
