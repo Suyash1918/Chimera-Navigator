@@ -1,4 +1,5 @@
 import { useAuth } from '@/components/auth-provider';
+import { DemoMode } from '@/components/demo-mode';
 import { Dashboard as DashboardComponent } from '@/components/dashboard';
 import { AuthHeader } from '@/components/auth-header';
 import { AccountStatus } from '@/components/account-status';

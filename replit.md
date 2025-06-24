@@ -73,8 +73,11 @@ ChimeraNavigator is a comprehensive React/TypeScript code analysis platform that
 - Created Project Chimera Python ML integration (surveyor.py, foreman.py, pipeline.py)
 - Added AI-to-Chimera command translation for automated code transformation
 - Built subscription management with monthly/quarterly/annual billing
-- Fixed Firebase authentication by switching to popup-based sign-in
+- Fixed Firebase authentication by switching to popup-based sign-in with error handling
 - Updated comprehensive README with complete platform overview and value proposition
+- Added detailed client usage scenario showing business impact and ROI
+- Implemented demo mode for when authentication is unavailable
+- Documented all known issues and limitations with workarounds
 - Application running successfully on port 5000
 
 ## User Preferences
@@ -82,6 +85,8 @@ ChimeraNavigator is a comprehensive React/TypeScript code analysis platform that
 - Prefers AI-driven schema modifications through natural language
 - Values comprehensive documentation for development team
 - Needs Firebase domain authorization fix for authentication to work
+- Requests comprehensive client usage scenarios and business impact analysis
+- Wants all known issues documented with workarounds where possible
 
 ## Current Status
 ✅ Application fully functional with tiered account system

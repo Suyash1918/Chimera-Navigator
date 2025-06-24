@@ -16,9 +16,15 @@ export function AuthHeader() {
     try {
       const result = await signInWithGoogle();
       console.log('Sign in successful:', result.user?.displayName);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign in failed:', error);
-      // You could add a toast notification here if needed
+      
+      // Show user-friendly error message
+      if (error.message) {
+        alert(`Sign-in error: ${error.message}`);
+      } else {
+        alert('Sign-in failed. Please check your internet connection and try again.');
+      }
     }
   };
 
