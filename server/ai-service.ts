@@ -3,15 +3,22 @@ import { storage } from "./storage";
 import { ChatMessage } from "@shared/schema";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 
 export class AIService {
+  private checkOpenAI() {
+    if (!openai) {
+      throw new Error("OpenAI API key not configured. AI features are unavailable.");
+    }
+  }
+
   async analyzeCode(code: string, filename: string): Promise<{
     summary: string;
     hooks: any[];
     imports: any[];
     suggestions: string[];
   }> {
+    this.checkOpenAI();
     const prompt = `Analyze this ${filename} React/TypeScript code and provide a comprehensive analysis. Return JSON with:
     - summary: Brief description of what the component does
     - hooks: List of React hooks used with their details
@@ -40,6 +47,7 @@ export class AIService {
   }
 
   async generateASTPath(elementDescription: string, componentCode: string): Promise<string> {
+    this.checkOpenAI();
     const prompt = `Given this React component code and element description, generate the AST path for the element.
     
     Component Code:
@@ -70,6 +78,7 @@ export class AIService {
     message: string,
     context: { userId: number; projectId?: number }
   ): Promise<string> {
+    this.checkOpenAI();
     let analysisData = null;
     
     if (context.projectId) {
@@ -123,6 +132,7 @@ export class AIService {
     modifiedSchema: any;
     explanation: string;
   }> {
+    this.checkOpenAI();
     const prompt = `You are a schema modification expert. Process this natural language command to modify the JSON schema.
 
     Current Schema:
@@ -160,6 +170,7 @@ export class AIService {
   }
 
   async analyzeProject(projectId: number): Promise<void> {
+    this.checkOpenAI();
     const files = await storage.getProjectFiles(projectId);
     const analysisData = {
       astData: {},
@@ -199,6 +210,7 @@ export class AIService {
   }
 
   async generateCodeReview(projectId: number): Promise<any> {
+    this.checkOpenAI();
     const analysis = await storage.getAnalysisResult(projectId);
     if (!analysis) {
       throw new Error('No analysis data found for project');
