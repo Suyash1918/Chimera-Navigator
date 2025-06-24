@@ -1,0 +1,200 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Chimera Schema",
+  "description": "Schema for Project Chimera's structured representation of React/TypeScript projects",
+  "type": "object",
+  "required": ["projectName", "rootDirectory", "tree"],
+  "properties": {
+    "projectName": {
+      "type": "string",
+      "description": "Name of the project"
+    },
+    "rootDirectory": {
+      "type": "string",
+      "description": "Root directory path"
+    },
+    "tree": {
+      "$ref": "#/definitions/TreeNode"
+    }
+  },
+  "definitions": {
+    "TreeNode": {
+      "type": "object",
+      "required": ["type", "name", "path"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["directory", "Component"]
+        },
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TreeNode"
+          }
+        },
+        "fileName": {
+          "type": "string",
+          "description": "Required for Component type"
+        },
+        "definition": {
+          "$ref": "#/definitions/ComponentDefinition",
+          "description": "Required for Component type"
+        },
+        "imports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ImportDeclaration"
+          }
+        },
+        "exports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExportDeclaration"
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "Component"
+          }
+        }
+      },
+      "then": {
+        "required": ["fileName", "definition"]
+      }
+    },
+    "ComponentDefinition": {
+      "type": "object",
+      "required": ["rootElementType", "elements"],
+      "properties": {
+        "rootElementType": {
+          "type": "string"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Element"
+          }
+        },
+        "schema": {
+          "type": "object",
+          "description": "Optional schema definition for the component"
+        }
+      }
+    },
+    "Element": {
+      "type": "object",
+      "required": ["id", "type", "sourceLocation"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the element"
+        },
+        "type": {
+          "type": "string",
+          "description": "Element type (e.g., 'div', 'span', 'Heading')"
+        },
+        "sourceLocation": {
+          "$ref": "#/definitions/SourceLocation"
+        },
+        "props": {
+          "$ref": "#/definitions/ElementProps"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Element"
+          }
+        }
+      }
+    },
+    "SourceLocation": {
+      "type": "object",
+      "required": ["startLine", "endLine"],
+      "properties": {
+        "startLine": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "endLine": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "ElementProps": {
+      "type": "object",
+      "properties": {
+        "className": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "$ref": "#/definitions/Element"
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "ImportDeclaration": {
+      "type": "object",
+      "required": ["source", "specifiers"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Import source path"
+        },
+        "specifiers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of imported identifiers"
+        },
+        "isDefault": {
+          "type": "boolean",
+          "description": "Whether this is a default import"
+        }
+      }
+    },
+    "ExportDeclaration": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["default", "named"]
+        },
+        "isComponent": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -131,9 +131,10 @@ export class AIService {
     success: boolean;
     modifiedSchema: any;
     explanation: string;
+    chimeraCommands?: string[];
   }> {
     this.checkOpenAI();
-    const prompt = `You are a schema modification expert. Process this natural language command to modify the JSON schema.
+    const prompt = `You are a schema modification expert working with Project Chimera. Process this natural language command to modify the JSON schema and generate corresponding Chimera transformation commands.
 
     Current Schema:
     ${JSON.stringify(currentSchema, null, 2)}
@@ -144,19 +145,23 @@ export class AIService {
     - success: boolean
     - modifiedSchema: the updated schema object
     - explanation: what changes were made
+    - chimeraCommands: array of Chimera command strings for AST transformation
+
+    Project Chimera Command Format:
+    - "target.ast.path.property=newValue"
+    - Example: "tree.children.0.definition.schema.properties.email={\"type\":\"string\",\"format\":\"email\"}"
 
     Examples of commands:
-    - "Add a new field called 'description' of type string"
-    - "Remove the 'deprecated' field"
-    - "Change the 'age' field to be required"
-    - "Add validation for email format"`;
+    - "Add a required email field" → generates schema change + chimera commands
+    - "Remove the deprecated field" → generates removal commands
+    - "Change className to use dark theme" → generates style update commands`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "You are a JSON schema expert. Modify schemas based on natural language commands."
+          content: "You are a JSON schema expert integrated with Project Chimera AST transformation system. Generate both schema modifications and corresponding AST transformation commands."
         },
         {
           role: "user",
@@ -166,7 +171,7 @@ export class AIService {
       response_format: { type: "json_object" },
     });
 
-    return JSON.parse(response.choices[0].message.content || '{"success": false, "modifiedSchema": {}, "explanation": "Failed to process command"}');
+    return JSON.parse(response.choices[0].message.content || '{"success": false, "modifiedSchema": {}, "explanation": "Failed to process command", "chimeraCommands": []}');
   }
 
   async analyzeProject(projectId: number): Promise<void> {

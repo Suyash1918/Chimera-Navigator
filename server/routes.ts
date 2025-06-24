@@ -5,6 +5,14 @@ import { storage } from "./storage";
 import { aiService } from "./ai-service";
 import { insertProjectSchema, insertProjectFileSchema, insertLogSchema } from "@shared/schema";
 import { z } from "zod";
+import Stripe from "stripe";
+
+// Initialize Stripe
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+}) : new Stripe("sk_test_placeholder_stripe_secret_key", {
+  apiVersion: "2023-10-16",
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -415,7 +423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Schema Modification Endpoint
+  // Schema Modification Endpoint with Project Chimera Integration
   app.post('/api/ai/modify-schema', requireAuth, async (req: any, res) => {
     try {
       const { command, currentSchema, projectId } = req.body;
@@ -432,29 +440,266 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const result = await aiService.processSchemaCommand(command, currentSchema);
+      // First get AI recommendation for schema change
+      const aiResult = await aiService.processSchemaCommand(command, currentSchema);
       
-      if (result.success && projectId) {
-        // Update the project's analysis results with new schema
-        const analysisResult = await storage.getAnalysisResult(projectId);
-        if (analysisResult) {
-          await storage.updateAnalysisResult(projectId, {
-            schema: result.modifiedSchema
+      if (aiResult.success && projectId) {
+        // Execute Project Chimera transformation workflow
+        try {
+          // Convert AI command to Chimera command format
+          const chimeraCommand = `tree.definition.schema=${JSON.stringify(aiResult.modifiedSchema)}`;
+          
+          // Execute foreman.py with the transformation command
+          const { spawn } = require('child_process');
+          const foreman = spawn('python3', ['server/foreman.py', '--command', chimeraCommand], {
+            cwd: process.cwd(),
+            stdio: ['pipe', 'pipe', 'pipe']
+          });
+
+          let foremanOutput = '';
+          let foremanError = '';
+
+          foreman.stdout.on('data', (data) => {
+            foremanOutput += data.toString();
+          });
+
+          foreman.stderr.on('data', (data) => {
+            foremanError += data.toString();
+          });
+
+          foreman.on('close', async (code) => {
+            if (code === 0) {
+              // Foreman succeeded - update database
+              const analysisResult = await storage.getAnalysisResult(projectId);
+              if (analysisResult) {
+                await storage.updateAnalysisResult(projectId, {
+                  schema: aiResult.modifiedSchema
+                });
+              }
+
+              await storage.createLog({
+                projectId,
+                level: 'SUCCESS',
+                message: `Schema modified via Project Chimera: ${aiResult.explanation}`,
+                metadata: { 
+                  command, 
+                  chimeraCommand,
+                  schemaModified: true,
+                  foremanOutput: foremanOutput.slice(0, 500)
+                }
+              });
+
+              res.json({
+                success: true,
+                modifiedSchema: aiResult.modifiedSchema,
+                explanation: `${aiResult.explanation} - Applied via Project Chimera automation`,
+                chimeraExecution: {
+                  success: true,
+                  output: foremanOutput
+                }
+              });
+            } else {
+              // Foreman failed - still return AI result but note the automation failure
+              await storage.createLog({
+                projectId,
+                level: 'WARNING',
+                message: `Schema AI modification successful, but Chimera automation failed: ${aiResult.explanation}`,
+                metadata: { 
+                  command,
+                  chimeraError: foremanError,
+                  returnCode: code
+                }
+              });
+
+              res.json({
+                success: true,
+                modifiedSchema: aiResult.modifiedSchema,
+                explanation: `${aiResult.explanation} - Note: Automatic code transformation failed`,
+                chimeraExecution: {
+                  success: false,
+                  error: foremanError,
+                  code: code
+                }
+              });
+            }
+          });
+
+        } catch (chimeraError) {
+          // Fallback to regular AI processing if Chimera fails
+          await storage.createLog({
+            projectId,
+            level: 'WARNING',
+            message: `Chimera integration failed, using AI-only processing: ${aiResult.explanation}`,
+            metadata: { command, chimeraError: chimeraError.message }
+          });
+
+          res.json({
+            success: true,
+            modifiedSchema: aiResult.modifiedSchema,
+            explanation: `${aiResult.explanation} - Processed by AI (automation unavailable)`,
+            chimeraExecution: {
+              success: false,
+              error: chimeraError.message
+            }
           });
         }
-
-        await storage.createLog({
-          projectId,
-          level: 'INFO',
-          message: `Schema modified: ${result.explanation}`,
-          metadata: { command, schemaModified: true }
-        });
+      } else {
+        res.json(aiResult);
       }
-
-      res.json(result);
     } catch (error) {
       console.error('Schema modification error:', error);
       res.status(500).json({ error: 'Failed to modify schema' });
+    }
+  });
+
+  // Stripe Payment Endpoints
+  app.post('/api/stripe/create-subscription', requireAuth, async (req: any, res) => {
+    try {
+      const { priceId, paymentMethodId } = req.body;
+      const user = await storage.getUserByFirebaseUid(req.firebaseUid);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Create or retrieve Stripe customer
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: user.displayName,
+          metadata: { userId: user.id.toString() }
+        });
+        customerId = customer.id;
+        
+        // Update user with Stripe customer ID
+        await storage.updateUser(user.id, { stripeCustomerId: customerId });
+      }
+
+      // Attach payment method to customer
+      await stripe.paymentMethods.attach(paymentMethodId, {
+        customer: customerId,
+      });
+
+      // Set as default payment method
+      await stripe.customers.update(customerId, {
+        invoice_settings: { default_payment_method: paymentMethodId },
+      });
+
+      // Create subscription
+      const subscription = await stripe.subscriptions.create({
+        customer: customerId,
+        items: [{ price: priceId }],
+        payment_behavior: 'default_incomplete',
+        expand: ['latest_invoice.payment_intent'],
+      });
+
+      res.json({
+        subscriptionId: subscription.id,
+        clientSecret: subscription.latest_invoice?.payment_intent?.client_secret,
+        status: subscription.status,
+      });
+
+    } catch (error) {
+      console.error('Stripe subscription error:', error);
+      res.status(500).json({ error: 'Failed to create subscription' });
+    }
+  });
+
+  app.get('/api/stripe/prices', async (req, res) => {
+    try {
+      const prices = {
+        monthly: {
+          id: 'price_1234567890_monthly',
+          amount: 3900, // $39.00
+          currency: 'usd',
+          interval: 'month',
+          nickname: 'Pro Monthly'
+        },
+        quarterly: {
+          id: 'price_1234567890_quarterly', 
+          amount: 10500, // $105.00 (10% discount)
+          currency: 'usd',
+          interval: 'month',
+          interval_count: 3,
+          nickname: 'Pro Quarterly'
+        },
+        annual: {
+          id: 'price_1234567890_annual',
+          amount: 39000, // $390.00 (17% discount)
+          currency: 'usd', 
+          interval: 'year',
+          nickname: 'Pro Annual'
+        }
+      };
+
+      res.json(prices);
+    } catch (error) {
+      console.error('Get prices error:', error);
+      res.status(500).json({ error: 'Failed to get prices' });
+    }
+  });
+
+  app.post('/api/stripe/webhook', async (req, res) => {
+    try {
+      const sig = req.headers['stripe-signature'];
+      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder';
+      
+      let event;
+      try {
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+      } catch (err) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+
+      // Handle subscription events
+      switch (event.type) {
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated':
+          const subscription = event.data.object;
+          const customerId = subscription.customer;
+          
+          // Find user by Stripe customer ID
+          const customer = await stripe.customers.retrieve(customerId);
+          const userId = customer.metadata?.userId;
+          
+          if (userId && subscription.status === 'active') {
+            await storage.upgradeUserAccount(parseInt(userId));
+            
+            await storage.createLog({
+              projectId: null,
+              level: 'INFO',
+              message: `Subscription activated for user ${userId}`,
+              metadata: { 
+                subscriptionId: subscription.id,
+                customerId: customerId,
+                status: subscription.status
+              }
+            });
+          }
+          break;
+
+        case 'customer.subscription.deleted':
+          const deletedSub = event.data.object;
+          const deletedCustomerId = deletedSub.customer;
+          const deletedCustomer = await stripe.customers.retrieve(deletedCustomerId);
+          const deletedUserId = deletedCustomer.metadata?.userId;
+          
+          if (deletedUserId) {
+            // Downgrade to free tier
+            await storage.updateUser(parseInt(deletedUserId), { 
+              accountTier: 'free',
+              credits: 1
+            });
+          }
+          break;
+      }
+
+      res.status(200).send('Received');
+    } catch (error) {
+      console.error('Webhook error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
     }
   });
 

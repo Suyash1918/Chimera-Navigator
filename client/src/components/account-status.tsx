@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from './auth-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,7 @@ export function AccountStatus() {
   const { dbUser } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [isUpgrading, setIsUpgrading] = useState(false);
 
   const { data: accountStatus, isLoading } = useQuery<AccountStatus>({
@@ -50,8 +52,7 @@ export function AccountStatus() {
   });
 
   const handleUpgrade = () => {
-    setIsUpgrading(true);
-    upgradeMutation.mutate();
+    setLocation('/subscription');
   };
 
   if (isLoading || !accountStatus) {
@@ -118,10 +119,10 @@ export function AccountStatus() {
                 className="w-full"
                 size="sm"
               >
-                {isUpgrading ? 'Upgrading...' : 'Upgrade to Pro'}
+                {isUpgrading ? 'Upgrading...' : 'View Pro Plans'}
               </Button>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                Unlimited projects • Full AI features • Priority support
+                From $32.50/month • Unlimited projects • Full AI features
               </p>
             </div>
           </div>

@@ -1,0 +1,66 @@
+{
+  "projectName": "ChimeraNavigator",
+  "rootDirectory": "client",
+  "tree": {
+    "type": "directory",
+    "name": "src",
+    "path": "client/src",
+    "children": [
+      {
+        "type": "directory",
+        "name": "components",
+        "path": "client/src/components",
+        "children": [
+          {
+            "type": "Component",
+            "name": "Dashboard",
+            "fileName": "dashboard.tsx",
+            "path": "client/src/components/dashboard.tsx",
+            "definition": {
+              "rootElementType": "div",
+              "elements": [
+                {
+                  "id": "dashboard-main",
+                  "type": "div", 
+                  "sourceLocation": {
+                    "startLine": 10,
+                    "endLine": 25
+                  },
+                  "props": {
+                    "className": "dashboard-container p-6",
+                    "children": [
+                      {
+                        "type": "h1",
+                        "content": "Project Dashboard"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "projectName": {
+                    "type": "string",
+                    "description": "Name of the project"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["active", "pending", "completed"]
+                  }
+                },
+                "required": ["projectName"]
+              }
+            },
+            "imports": [
+              {
+                "source": "react",
+                "specifiers": ["useState", "useEffect"]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

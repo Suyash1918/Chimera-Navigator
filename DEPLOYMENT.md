@@ -12,7 +12,12 @@ VITE_FIREBASE_API_KEY=your_api_key
 VITE_FIREBASE_PROJECT_ID=your_project_id  
 VITE_FIREBASE_APP_ID=your_app_id
 
-# OpenAI (optional but recommended)
+# Stripe Payment Processing
+STRIPE_SECRET_KEY=sk_test_... (or sk_live_...)
+VITE_STRIPE_PUBLIC_KEY=pk_test_... (or pk_live_...)
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# OpenAI (optional but recommended for full AI features)
 OPENAI_API_KEY=your_openai_key
 ```
 

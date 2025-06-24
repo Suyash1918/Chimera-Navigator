@@ -11,6 +11,9 @@ export const users = pgTable("users", {
   photoURL: text("photo_url"),
   accountTier: text("account_tier").notNull().default("free"), // 'free' | 'pro'
   credits: integer("credits").default(1), // null for pro accounts (unlimited)
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStatus: text("subscription_status"), // 'active' | 'canceled' | 'past_due'
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

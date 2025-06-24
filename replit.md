@@ -70,6 +70,10 @@ ChimeraNavigator is a comprehensive React/TypeScript code analysis platform that
 - Added credit management and account upgrade functionality
 - Created AI-powered schema modification system
 - Added comprehensive README for developers
+- Implemented Stripe payment gateway with tiered pricing ($39/month Pro)
+- Created Project Chimera Python ML integration (surveyor.py, foreman.py, pipeline.py)
+- Added AI-to-Chimera command translation for automated code transformation
+- Built subscription management with monthly/quarterly/annual billing
 - Application running successfully on port 5000
 
 ## User Preferences
