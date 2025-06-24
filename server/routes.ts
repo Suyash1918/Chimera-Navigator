@@ -216,7 +216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Start analysis process
+      // Start analysis process (optional if OpenAI is available)
       try {
         await aiService.analyzeProject(projectId);
         await storage.updateProject(projectId, { status: 'completed' });
@@ -228,14 +228,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           metadata: { filesCount: savedFiles.length }
         });
       } catch (analysisError) {
-        await storage.updateProject(projectId, { status: 'error' });
-        await storage.createLog({
-          projectId,
-          level: 'ERROR',
-          message: 'Project analysis failed',
-          metadata: { error: analysisError.message }
-        });
-        throw analysisError;
+        // If AI analysis fails, still mark upload as successful but note the limitation
+        if (analysisError.message.includes('OpenAI API key not configured')) {
+          await storage.updateProject(projectId, { status: 'completed' });
+          await storage.createLog({
+            projectId,
+            level: 'WARNING',
+            message: 'Files uploaded successfully, AI analysis skipped (OpenAI API key not configured)',
+            metadata: { filesCount: savedFiles.length }
+          });
+        } else {
+          await storage.updateProject(projectId, { status: 'error' });
+          await storage.createLog({
+            projectId,
+            level: 'ERROR',
+            message: 'Project analysis failed',
+            metadata: { error: analysisError.message }
+          });
+          throw analysisError;
+        }
       }
 
       res.json({ files: savedFiles });
