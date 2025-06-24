@@ -1,104 +1,78 @@
-# ChimeraNavigator AI - Code Analysis Platform
+# ChimeraNavigator - Code Analysis Platform
 
-## Overview
+## Project Overview
+ChimeraNavigator is a comprehensive React/TypeScript code analysis platform that helps developers understand, analyze, and improve their projects through AI-powered insights.
 
-ChimeraNavigator AI is a full-stack web application designed to analyze React, TypeScript, and JavaScript projects. The platform provides AST (Abstract Syntax Tree) analysis, React hooks optimization, import dependency mapping, and AI-powered code insights through an interactive chat interface.
+## Core Features
 
-## System Architecture
+### 1. **Project Management**
+- Create and manage multiple React/TypeScript projects
+- Upload and organize project files
+- Track project status and progress
 
-The application follows a monorepo structure with a clear separation of concerns:
+### 2. **AI-Powered Code Analysis**
+- Analyze React components and TypeScript code
+- Extract hooks, imports, and dependencies
+- Generate Abstract Syntax Tree (AST) data
+- Provide code improvement suggestions
 
-- **Frontend**: React-based SPA built with Vite
-- **Backend**: Express.js server with TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **Real-time Communication**: WebSocket for AI chat functionality
-- **Authentication**: Firebase Authentication
-- **UI Framework**: shadcn/ui with Tailwind CSS
+### 3. **Interactive Dashboard**
+- Visual project overview with analytics
+- File management and upload interface
+- Real-time progress tracking
+- Log viewer for debugging
 
-## Key Components
+### 4. **AI Chat Assistant**
+- Real-time WebSocket-based chat with AI
+- Context-aware responses based on project analysis
+- Code review and improvement suggestions
+- Natural language schema modifications
 
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite with custom configuration
-- **Routing**: Wouter for lightweight client-side routing
-- **State Management**: TanStack Query for server state management
-- **UI Components**: shadcn/ui component library with Radix UI primitives
-- **Styling**: Tailwind CSS with custom design tokens
-- **Authentication**: Firebase Auth with Google OAuth
+### 5. **Advanced Analysis Tools**
+- **AST Viewer**: Visualize and navigate code structure
+- **Hooks Analysis**: Track React hooks usage patterns
+- **Dependencies View**: Analyze project dependencies
+- **Schema Editor**: Modify JSON schemas with natural language
 
-### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ES modules
-- **Database ORM**: Drizzle with PostgreSQL dialect
-- **Real-time**: WebSocket server for AI chat functionality
-- **AI Integration**: OpenAI GPT-4o for code analysis and chat responses
-- **File Processing**: Custom AST parsing for React/TypeScript files
+### 6. **Authentication & Security**
+- Firebase Google OAuth integration
+- User session management
+- Secure API endpoints with Firebase UID verification
+
+## Technical Architecture
+
+### Backend (Express.js)
+- RESTful API with Express.js
+- PostgreSQL database with Drizzle ORM
+- WebSocket server for real-time AI chat
+- File upload and storage management
+- AI service integration (OpenAI GPT-4o)
+
+### Frontend (React + Vite)
+- Modern React with TypeScript
+- Tailwind CSS + Radix UI components
+- Real-time WebSocket communication
+- Firebase authentication
+- Responsive design
 
 ### Database Schema
-The application uses PostgreSQL with the following core entities:
-- **Users**: Firebase UID integration with profile data
-- **Projects**: User-owned code analysis projects
-- **Project Files**: Uploaded source code files with metadata
-- **Analysis Results**: Parsed AST data, hooks, imports, and dependencies
-- **AI Chats**: Conversation history with context-aware responses
-- **Logs**: System and processing logs for debugging
-
-## Data Flow
-
-1. **Authentication**: Users authenticate via Firebase Google OAuth
-2. **Project Creation**: Users create projects and upload React/TypeScript files
-3. **File Processing**: Backend parses files to extract AST, hooks, and dependencies
-4. **Analysis Storage**: Results are stored in PostgreSQL for retrieval
-5. **AI Chat**: Real-time WebSocket connection enables context-aware AI assistance
-6. **Visualization**: Frontend renders analysis results through interactive components
-
-## External Dependencies
-
-### Core Dependencies
-- **@neondatabase/serverless**: Serverless PostgreSQL connection
-- **firebase**: Authentication and user management
-- **openai**: AI-powered code analysis and chat
-- **drizzle-orm**: Type-safe database operations
-- **@tanstack/react-query**: Server state management
-- **@radix-ui/***: Accessible UI component primitives
-
-### Development Tools
-- **vite**: Fast development server and build tool
-- **typescript**: Type safety and enhanced development experience
-- **tailwindcss**: Utility-first CSS framework
-- **drizzle-kit**: Database migration and schema management
-
-## Deployment Strategy
-
-The application is configured for deployment on Replit with the following setup:
-
-- **Environment**: Node.js 20 with PostgreSQL 16
-- **Build Process**: Vite builds the client, esbuild bundles the server
-- **Production Command**: Serves static files and API from a single Express server
-- **Development**: Hot reloading with Vite middleware integration
-- **Port Configuration**: Runs on port 5000 (internal) mapped to port 80 (external)
-
-### Environment Variables Required
-- `DATABASE_URL`: PostgreSQL connection string
-- `OPENAI_API_KEY`: OpenAI API access for AI features
-- `VITE_FIREBASE_*`: Firebase configuration for authentication
+- Users, Projects, ProjectFiles tables
+- Analysis results storage
+- Chat messages and logs
+- Session management
 
 ## Recent Changes
-
-- June 24, 2025: Complete ChimeraNavigator AI platform setup
-  ✓ Database schema with PostgreSQL and Drizzle ORM
-  ✓ Firebase authentication with Google OAuth
-  ✓ OpenAI GPT-4o integration for code analysis
-  ✓ React/TypeScript frontend with shadcn/ui
-  ✓ WebSocket real-time AI chat functionality
-  ✓ File upload and project management system
-  ✓ AST analysis and hooks detection framework
-  ✓ Project dashboard with analysis visualization
-
-## Changelog
-
-- June 24, 2025: Initial setup and full platform deployment
+- 2024-01-24: Successfully migrated from Replit Agent to Replit environment
+- Fixed PostgreSQL database connection
+- Made OpenAI service optional to prevent startup crashes
+- Added Firebase authentication credentials
+- Application now running on port 5000
 
 ## User Preferences
+- None specified yet
 
-Preferred communication style: Simple, everyday language.
+## Current Status
+✅ Application successfully running and ready for use
+✅ Database configured and connected
+✅ Authentication system active
+✅ AI features available (requires OPENAI_API_KEY for full functionality)
