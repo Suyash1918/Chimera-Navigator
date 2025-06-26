@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -56,14 +58,23 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // Use port from environment variable, or default to 5000
+  const port = process.env.PORT || 5000;
+  
+  // Graceful error handler for server startup issues
+  server.on('error', (e: any) => {
+    if (e.code === 'EADDRINUSE') {
+      log(`Error: Port ${port} is already in use.`);
+      log('Please ensure no other processes are using this port and try again.');
+    } else {
+      log(`An unexpected server error occurred: ${e.message}`);
+    }
+  });
+
   server.listen({
-    port,
+    port: Number(port), // Ensure port is a number
     host: "0.0.0.0",
-    reusePort: true,
+    // REMOVED: reusePort: true, as it can cause issues on Windows
   }, () => {
     log(`serving on port ${port}`);
   });
